@@ -1,0 +1,31 @@
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.testng.Assert;
+import org.testng.annotations.Test;
+
+public class CoinDeskAPITest {
+
+    @Test
+    public void verifyBpiInResponse() {
+        // Step 1: Send GET request to the endpoint
+        String endpoint = "https://api.coindesk.com/v1/bpi/currentprice.json";
+        Response response = RestAssured.get(endpoint);
+
+        // Step 2: Verify the response status code is 200
+        Assert.assertEquals(response.getStatusCode(), 200, "Unexpected status code");
+
+        // Step 3: Parse the JSON response
+        String jsonResponse = response.getBody().asString();
+        
+        // Step 4: Verify that the response contains 3 BPIs: USD, GBP, EUR
+        Assert.assertTrue(jsonResponse.contains("USD"), "USD not found in response");
+        Assert.assertTrue(jsonResponse.contains("GBP"), "GBP not found in response");
+        Assert.assertTrue(jsonResponse.contains("EUR"), "EUR not found in response");
+
+        // Step 5: Verify that the GBP description is 'British Pound Sterling'
+        String gbpDescription = response.jsonPath().getString("bpi.GBP.description");
+        Assert.assertEquals(gbpDescription, "British Pound Sterling", "GBP description mismatch");
+
+        System.out.println("Test Passed: API response contains expected BPIs and GBP description.");
+    }
+}
